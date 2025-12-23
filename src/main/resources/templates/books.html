@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{books.title}">Список книг</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .search-form input[type="text"] {
+            min-width: 260px;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            font-size: 0.9rem;
+        }
+        .search-form input[type="number"],
+        .search-form select {
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            font-size: 0.9rem;
+        }
+        .search-form button {
+            padding: 0.4rem 0.9rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .search-form button:hover {
+            background: #0056b3;
+        }
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .pagination a {
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .pagination a.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: default;
+        }
+        .pagination span.current-page {
+            font-weight: bold;
+        }
+        .book-list {
+            list-style: none;
+            padding: 0;
+        }
+        .book-item {
+            padding: 1.5rem;
+            margin: 1rem 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .book-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .book-item a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .book-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        .book-author {
+            color: #666;
+            font-size: 1rem;
+        }
+        .book-year {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 3rem;
+            background: white;
+            border-radius: 8px;
+        }
+        .add-book-btn {
+            padding: 0.6rem 1.2rem;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        .add-book-btn:hover {
+            background: #218838;
+            color: white;
+        }
+    </style>
+    <div th:replace="fragments/header :: header-styles"></div>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    <h1>📚 <span th:text="#{books.title}">Каталог книг</span></h1>
+
+    <div class="toolbar">
+        <form class="search-form" method="get" th:action="@{/books}">
+            <input type="text" 
+                   name="q" 
+                   th:placeholder="#{books.search.placeholder}"
+                   th:value="${q}"/>
+            <select name="sort">
+                <option value="" th:selected="${sort == null}">Default</option>
+                <option value="title" th:selected="${sort == 'title'}">By title</option>
+                <option value="author" th:selected="${sort == 'author'}">By author</option>
+                <option value="pub_year" th:selected="${sort == 'pub_year'}">By publication year</option>
+            </select>
+            <span>Size:</span>
+            <select name="size">
+                <option value="5" th:selected="${size == 5}">5</option>
+                <option value="10" th:selected="${size == 10}">10</option>
+                <option value="20" th:selected="${size == 20}">20</option>
+                <option value="50" th:selected="${size == 50}">50</option>
+            </select>
+            <button type="submit" th:text="#{books.search.button}">Застосувати</button>
+        </form>
+
+            <div th:if="${totalPages > 0}" class="pagination">
+            <a th:classappend="${page <= 0} ? 'disabled'" 
+               th:href="@{/books(page=${page - 1}, size=${size}, sort=${sort}, q=${q})}">← <span th:text="#{books.pagination.previous}">Попередня</span></a>
+            <span class="current-page" th:text="|#{books.pagination.page} ${page + 1} #{books.pagination.of} ${totalPages}|">Сторінка 1 з 1</span>
+            <a th:classappend="${page + 1 >= totalPages} ? 'disabled'"
+               th:href="@{/books(page=${page + 1}, size=${size}, sort=${sort}, q=${q})}"><span th:text="#{books.pagination.next}">Наступна</span> →</a>
+        </div>
+    </div>
+
+    <div th:if="${books != null and !books.isEmpty()}">
+        <ul class="book-list">
+            <li th:each="book : ${books}" class="book-item">
+                <a th:href="@{/books/{id}(id=${book.id})}">
+                    <div class="book-title" th:text="${book.title}">Book Title</div>
+                    <div class="book-author" th:text="|#{books.table.author}: ${book.author}|">Автор: Author Name</div>
+                    <div class="book-year" th:text="|#{books.table.year}: ${book.pubYear}|">Рік видання: 2023</div>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div th:unless="${books != null and !books.isEmpty()}" class="empty-state">
+        <p th:text="#{books.empty}">Книг поки немає.</p>
+        <a href="/books/add" class="add-book-btn" th:text="#{books.add.new}">Додати книгу</a>
+    </div>
+</body>
+</html>

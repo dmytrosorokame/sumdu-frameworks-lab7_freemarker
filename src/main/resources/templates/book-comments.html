@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${book.title}">Book Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .book-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .book-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        .book-meta {
+            color: #666;
+            font-style: italic;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        form {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: #555;
+            font-weight: 500;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            padding: 0.6rem 1.5rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button.delete-btn {
+            padding: 0.4rem 1rem;
+            background: #dc3545;
+            font-size: 13px;
+        }
+        button.delete-btn:hover {
+            background: #c82333;
+        }
+        .comments-list {
+            list-style: none;
+            padding: 0;
+        }
+        .comment-item {
+            padding: 1.2rem;
+            margin: 0.8rem 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .comment-author {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 16px;
+        }
+        .comment-date {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .comment-text {
+            color: #333;
+            line-height: 1.5;
+        }
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+        }
+        .comments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .pagination a {
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .pagination a.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: default;
+        }
+        .pagination span.current-page {
+            font-weight: bold;
+        }
+    </style>
+    <div th:replace="fragments/header :: header-styles"></div>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    <div class="book-info">
+        <div class="book-title">📖 <span th:text="${book.title}">Book Title</span></div>
+        <p class="book-meta">
+            <span th:text="#{comments.book.author}">Автор</span>: <span th:text="${book.author}">Author</span>, 
+            <span th:text="#{comments.book.year}">Рік</span>: <span th:text="${book.pubYear}">2023</span>
+        </p>
+        <a th:href="@{/books}" class="back-link">← <span th:text="#{comments.back.to.catalog}">Повернутись до каталогу</span></a>
+    </div>
+
+    <div class="comments-header">
+        <h2>💬 <span th:text="#{comments.title}">Коментарі</span></h2>
+        <div th:if="${totalPages > 0}" class="pagination">
+            <a th:classappend="${page <= 0} ? 'disabled'"
+               th:href="@{/books/{id}(id=${book.id}, page=${page - 1}, size=${size})}">← <span th:text="#{books.pagination.previous}">Попередня</span></a>
+            <span class="current-page" th:text="|#{books.pagination.page} ${page + 1} #{books.pagination.of} ${totalPages}|">Сторінка 1 з 1</span>
+            <a th:classappend="${page + 1 >= totalPages} ? 'disabled'"
+               th:href="@{/books/{id}(id=${book.id}, page=${page + 1}, size=${size})}"><span th:text="#{books.pagination.next}">Наступна</span> →</a>
+        </div>
+    </div>
+    
+    <div th:if="${comments == null or comments.isEmpty()}" class="empty-state">
+        <p th:text="#{comments.empty}">Ще немає коментарів. Будьте першим!</p>
+    </div>
+
+    <ul th:unless="${comments == null or comments.isEmpty()}" class="comments-list">
+        <li th:each="comment : ${comments}" class="comment-item">
+            <div class="comment-header">
+                <div>
+                    <span class="comment-author" th:text="${comment.author}">Author</span>
+                    <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2024 12:00</span>
+                </div>
+                <form method="post" th:action="@{/books/{id}(id=${book.id})}" style="display:inline; padding:0; margin:0; background:none; box-shadow:none;">
+                    <input type="hidden" name="commentId" th:value="${comment.id}">
+                    <input type="hidden" name="_method" value="delete">
+                    <button type="submit" class="delete-btn" th:text="#{comments.delete}">Видалити</button>
+                </form>
+            </div>
+            <div class="comment-text" th:text="${comment.text}">Comment text</div>
+        </li>
+    </ul>
+
+    <h2>✍️ <span th:text="#{comments.add.title}">Додати коментар</span></h2>
+    <form method="post" th:action="@{/books/{id}(id=${book.id})}">
+        <div class="form-group">
+            <label for="author" th:text="#{comments.form.author.label}">Ваше ім'я:</label>
+            <input type="text" 
+                   id="author" 
+                   name="author" 
+                   th:placeholder="#{comments.form.author.placeholder}"
+                   required 
+                   maxlength="64">
+        </div>
+        <div class="form-group">
+            <label for="text" th:text="#{comments.form.text.label}">Коментар:</label>
+            <textarea id="text" 
+                      name="text" 
+                      th:placeholder="#{comments.form.text.placeholder}"
+                      required 
+                      maxlength="1000"></textarea>
+        </div>
+        <button type="submit" th:text="#{comments.form.submit}">Додати коментар</button>
+    </form>
+</body>
+</html>

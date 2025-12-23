@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <header th:fragment="header">
+        <nav class="header-nav">
+            <div class="header-container">
+                <a class="header-logo" th:href="@{/books}" th:text="#{app.title}">Каталог книг</a>
+                <div class="header-menu">
+                    <a class="header-link" th:href="@{/books}" th:text="#{app.navigation.books}">Книги</a>
+                    <a class="header-link" th:href="@{/books/add}" th:text="#{app.navigation.add}">Додати книгу</a>
+                    <div class="language-selector">
+                        <span class="current-lang" th:text="${#locale.language}">uk</span>
+                        <div class="language-dropdown">
+                            <div class="language-dropdown-content">
+                                <a href="#" 
+                                   th:onclick="'window.location.href = addLangParam(\'uk\'); return false;'"
+                                   th:classappend="${#locale.language == 'uk'} ? 'active'">Українська</a>
+                                <a href="#" 
+                                   th:onclick="'window.location.href = addLangParam(\'en\'); return false;'"
+                                   th:classappend="${#locale.language == 'en'} ? 'active'">English</a>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        function addLangParam(lang) {
+                            const url = new URL(window.location.href);
+                            // Видаляємо старий параметр lang, якщо він є
+                            url.searchParams.delete('lang');
+                            // Додаємо новий параметр lang
+                            url.searchParams.set('lang', lang);
+                            return url.toString();
+                        }
+                    </script>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <style th:fragment="header-styles">
+        .header-nav {
+            background: #007bff;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .header-logo:hover {
+            color: #e0e0e0;
+        }
+        .header-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .header-link {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .header-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .language-selector {
+            position: relative;
+            display: inline-block;
+        }
+        .current-lang {
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .language-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 0;
+            padding-top: 0.5rem;
+            background: transparent;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        .language-selector:hover .language-dropdown {
+            display: block;
+        }
+        .language-dropdown-content {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .language-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .language-dropdown-content a:hover {
+            background: #f8f9fa;
+        }
+        .language-dropdown-content a.active {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</body>
+</html>
